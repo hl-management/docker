@@ -1,0 +1,55 @@
+FROM ubuntu:xenial
+
+LABEL maintainer 'Haruka TSUKAGOSHI <haruka.tsukagoshi@hmi.ousin.jp>'
+
+# env
+ENV ORMASTER_PASS=ormaster \
+    ORCA_DISTRIBUTION=xenial50 \
+    DEBIAN_FRONTEND=noninteractive
+
+# set timezone to JST
+RUN ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+# install utilities
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends sudo wget ca-certificates gnupg expect \
+    && apt-get -y dist-upgrade \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup ORCA
+RUN wget -q https://ftp.orca.med.or.jp/pub/ubuntu/archive.key -O - \
+      | apt-key add - \
+    && wget -q -O /etc/apt/sources.list.d/jma-receipt-$ORCA_DISTRIBUTION.list \
+      https://ftp.orca.med.or.jp/pub/ubuntu/jma-receipt-$ORCA_DISTRIBUTION.list \
+    && apt-get update \
+    && apt-get -y install --no-install-recommends jma-receipt jma-receipt-pusher push-exchanger \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget http://ftp.orca.med.or.jp/pub/etc/install_modules_for_ftp.tgz -O - | tar xvzf - -C /tmp \
+    && sudo -u orca bash -c 'cd /tmp/install_modules_for_ftp; ./install_modules.sh' \
+    && rm -rf /tmp/install_modules_for_ftp \
+    && service postgresql start \
+    && jma-setup \
+    && expect -c " \
+spawn sudo -u orca /usr/lib/jma-receipt/bin/passwd_store.sh; \
+expect \":\"; send \"${ORMASTER_PASS}\n\"; \
+expect \":\"; send \"${ORMASTER_PASS}\n\"; \
+expect eof;" \
+    && sed -i -e "s/^\(:api_user:\s*\).*$/\1ormaster/g" \
+      -e "s/^\(:api_key:\s*\).*$/\1${ORMASTER_PASS}/g" \
+      /etc/push-exchanger/push-exchanger.yml
+
+# copy docker-entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# shared volume
+VOLUME [ "/etc/jma-receipt", "/var/lib/jma-receipt", "/var/log/jma-receipt", "/var/lib/postgresql/9.5/main"]
+
+# expose (orca api & postgresql)
+EXPOSE 8000 5432
+
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+
+CMD [ "tail", "-f", "/dev/null"]
