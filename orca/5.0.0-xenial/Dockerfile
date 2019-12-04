@@ -38,7 +38,12 @@ expect \":\"; send \"${ORMASTER_PASS}\n\"; \
 expect eof;" \
     && sed -i -e "s/^\(:api_user:\s*\).*$/\1ormaster/g" \
       -e "s/^\(:api_key:\s*\).*$/\1${ORMASTER_PASS}/g" \
-      /etc/push-exchanger/push-exchanger.yml
+      /etc/push-exchanger/push-exchanger.yml \
+    && /usr/lib/jma-receipt/bin/jma-receipt-program-upgrade.sh \
+    && /usr/lib/jma-receipt/scripts/tools/run_master_upgrade.sh
+
+RUN echo "listen_addresses = '*'" >> /etc/postgresql/9.5/main/postgresql.conf \
+    && sed -i -e 's/127\.0\.0\.1\/32/0.0.0.0\/0/g' /etc/postgresql/9.5/main/pg_hba.conf
 
 # copy docker-entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
