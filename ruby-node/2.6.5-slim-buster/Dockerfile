@@ -3,7 +3,7 @@ FROM ruby:2.6.5-slim-buster
 RUN apt-get update -qq && \
   apt-get install -y --no-install-recommends build-essential patch zlib1g-dev liblzma-dev pkg-config \
   libxml2-dev libxslt1-dev imagemagick libvips nkf \
-  curl default-libmysqlclient-dev && \
+  curl default-libmysqlclient-dev libpq-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
