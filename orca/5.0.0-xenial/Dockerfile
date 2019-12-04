@@ -23,7 +23,7 @@ RUN wget -q https://ftp.orca.med.or.jp/pub/ubuntu/archive.key -O - \
     && wget -q -O /etc/apt/sources.list.d/jma-receipt-$ORCA_DISTRIBUTION.list \
       https://ftp.orca.med.or.jp/pub/ubuntu/jma-receipt-$ORCA_DISTRIBUTION.list \
     && apt-get update \
-    && apt-get -y install --no-install-recommends jma-receipt jma-receipt-pusher push-exchanger \
+    && apt-get -y install --no-install-recommends jma-receipt jma-receipt-pusher \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && wget http://ftp.orca.med.or.jp/pub/etc/install_modules_for_ftp.tgz -O - | tar xvzf - -C /tmp \
@@ -36,9 +36,6 @@ spawn sudo -u orca /usr/lib/jma-receipt/bin/passwd_store.sh; \
 expect \":\"; send \"${ORMASTER_PASS}\n\"; \
 expect \":\"; send \"${ORMASTER_PASS}\n\"; \
 expect eof;" \
-    && sed -i -e "s/^\(:api_user:\s*\).*$/\1ormaster/g" \
-      -e "s/^\(:api_key:\s*\).*$/\1${ORMASTER_PASS}/g" \
-      /etc/push-exchanger/push-exchanger.yml \
     && /usr/lib/jma-receipt/bin/jma-receipt-program-upgrade.sh \
     && /usr/lib/jma-receipt/scripts/tools/run_master_upgrade.sh
 
