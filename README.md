@@ -5,5 +5,5 @@
 - [Docker Hub](https://hub.docker.com/r/homis/ruby-node)
 
 ## orca
-- [GitHub](https://github.com/hl-management/tree/orca/orca)
+- [GitHub](https://github.com/hl-management/docker/tree/orca/orca)
 - [Docker Hub](https://hub.docker.com/r/homis/orca)
