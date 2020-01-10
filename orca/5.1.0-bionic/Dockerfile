@@ -1,10 +1,11 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 
 LABEL maintainer 'Haruka TSUKAGOSHI <h-tsukagoshi@hl-management.jp>'
 
 # env
 ENV ORMASTER_PASSWORD=ormaster \
-    ORCA_DISTRIBUTION=xenial50 \
+    ORCA_DISTRIBUTION=bionic51 \
+    POSTGRESQL_VER=10 \
     DEBIAN_FRONTEND=noninteractive
 
 # set timezone to JST
@@ -29,6 +30,9 @@ RUN apt-get update \
 # setup ORCA
 RUN service postgresql start \
     && jma-setup \
+    && service jma-receipt start \
+    && service jma-receipt stop \
+    && service jma-receipt start \
     && expect -c " \
 spawn sudo -u orca /usr/lib/jma-receipt/bin/passwd_store.sh; \
 expect \":\"; send \"${ORMASTER_PASSWORD}\n\"; \
@@ -36,15 +40,15 @@ expect \":\"; send \"${ORMASTER_PASSWORD}\n\"; \
 expect eof;"
 
 # setup postgresql
-RUN echo "listen_addresses = '*'" >> /etc/postgresql/9.5/main/postgresql.conf \
-    && sed -i -e 's/127\.0\.0\.1\/32/0.0.0.0\/0/g' /etc/postgresql/9.5/main/pg_hba.conf
+RUN echo "listen_addresses = '*'" >> /etc/postgresql/$POSTGRESQL_VER/main/postgresql.conf \
+    && sed -i -e 's/127\.0\.0\.1\/32/0.0.0.0\/0/g' /etc/postgresql/$POSTGRESQL_VER/main/pg_hba.conf
 
 # copy docker-entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # shared volume
-VOLUME [ "/etc/jma-receipt", "/var/lib/jma-receipt", "/var/log/jma-receipt", "/var/lib/postgresql/9.5/main"]
+VOLUME [ "/etc/jma-receipt", "/var/lib/jma-receipt", "/var/log/jma-receipt", "/var/lib/postgresql/$POSTGRESQL_VER/main", "/etc/postgresql/$POSTGRESQL_VER/main"]
 
 # expose (orca api & postgresql)
 EXPOSE 8000 9400 5432
