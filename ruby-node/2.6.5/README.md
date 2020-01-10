@@ -1,3 +1,3 @@
 # ruby node
 
-ruby + Node.js, suitable for Ruby on Rails
+ruby2.6.5 + Node.js12, suitable for Ruby on Rails
