@@ -2,7 +2,7 @@ FROM ruby:2.7.0-slim-buster
 
 RUN apt-get update -qq && \
   apt-get install -y --no-install-recommends build-essential patch zlib1g-dev liblzma-dev pkg-config \
-  libxml2-dev libxslt1-dev imagemagick libvips nkf git \
+  libxml2-dev libxslt1-dev imagemagick libvips nkf git ssh \
   curl default-libmysqlclient-dev libpq-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
