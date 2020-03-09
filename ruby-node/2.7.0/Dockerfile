@@ -4,7 +4,7 @@ ENV LANG C.UTF-8
 RUN apt-get update -qq && \
   apt-get install -y --no-install-recommends build-essential patch zlib1g-dev liblzma-dev pkg-config \
   libxml2-dev libxslt1-dev imagemagick libvips nkf git ssh \
-  curl default-libmysqlclient-dev libpq-dev libmhash-dev && \
+  curl default-libmysqlclient-dev libpq-dev libmhash-dev nano vim && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
